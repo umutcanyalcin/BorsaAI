@@ -1,9 +1,9 @@
 {
     "cash": 100000.0,
     "shares": 0,
-    "currentPrice": 370.0,
+    "currentPrice": 371.49,
     "avgCost": 0,
     "totalCost": 0,
     "trades": [],
-    "aiThoughts": "Sistem başlatılıyor... Piyasalar açıldığında AI analizi başlayacak."
+    "aiThoughts": "AI Analiz Hatas\u0131: Beklemeye ge\u00e7ildi."
 }
