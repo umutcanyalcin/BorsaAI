@@ -1,0 +1,59 @@
+{
+    "strategy": "Kademeli Pozisyon Alma + Momentum",
+    "ticker": "ASELS",
+    "initialCapital": 100000,
+    "rules": {
+        "maxSingleTradePercent": 25,
+        "maxPositionPercent": 75,
+        "minCashReservePercent": 25,
+        "commissionRate": 0.002,
+        "stopLossPercent": 8,
+        "takeProfitLevels": [
+            { "percent": 6.8, "sellPercent": 30, "note": "395 TL ilk direnç" },
+            { "percent": 15.7, "sellPercent": 30, "note": "428 TL analist hedefi" },
+            { "percent": 27, "sellPercent": 40, "note": "470 TL yüksek hedef - trailing stop" }
+        ],
+        "buyConditions": {
+            "rsiOversold": 35,
+            "supportLevel": 360,
+            "breakoutLevel": 395,
+            "strongSupportLevel": 310,
+            "maxBuyPrice": 400
+        },
+        "sellConditions": {
+            "stopLoss": 340,
+            "rsiOverbought": 70,
+            "resistance1": 395,
+            "resistance2": 411.25,
+            "panicSell": 310
+        }
+    },
+    "tradingPlan": {
+        "phase1": {
+            "trigger": "Market açılış - İlk 30 dk gözlem",
+            "action": "İZLE - İlk 30 dakika sadece fiyat hareketini gözlemle",
+            "note": "Açılış volatilitesinde işlem yapma"
+        },
+        "phase2": {
+            "trigger": "360-375 TL aralığında stabilize",
+            "action": "İlk kademe alım - Sermayenin %25'i (~67 adet @370)",
+            "note": "Destek seviyesinde alım fırsatı"
+        },
+        "phase3": {
+            "trigger": "360 TL'ye düşüş veya 395 TL kırılımı",
+            "action": "İkinci kademe alım - Sermayenin %25'i daha",
+            "note": "Ya destekte güçlendir ya kırılımda ekle"
+        },
+        "phase4": {
+            "trigger": "395+ TL veya 340 TL altı",
+            "action": "Kâr al veya Stop-Loss",
+            "note": "Disiplinli çıkış"
+        }
+    },
+    "marketHours": {
+        "open": "10:00",
+        "close": "18:00",
+        "timezone": "Europe/Istanbul",
+        "checkInterval": 30
+    }
+}

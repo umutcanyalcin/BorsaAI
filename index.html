@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BorsaAI — Aselsan (ASELS) Trading Dashboard</title>
+    <meta name="description" content="Profesyonel Aselsan hisse takip ve sanal portföy yönetim platformu">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="pulse-ring"></div>
+                <span class="loading-icon">📊</span>
+            </div>
+            <h2>BorsaAI</h2>
+            <p>Piyasa verileri yükleniyor...</p>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">📊</span>
+                    <span class="logo-text">BorsaAI</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="dashboard" id="nav-dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="analysis" id="nav-analysis">
+                    <span class="nav-icon">🔬</span>
+                    <span class="nav-label">Analiz</span>
+                </button>
+                <button class="nav-item" data-tab="portfolio" id="nav-portfolio">
+                    <span class="nav-icon">💼</span>
+                    <span class="nav-label">Portföy</span>
+                </button>
+                <button class="nav-item" data-tab="trading" id="nav-trading">
+                    <span class="nav-icon">⚡</span>
+                    <span class="nav-label">Al-Sat</span>
+                </button>
+                <button class="nav-item" data-tab="institutions" id="nav-institutions">
+                    <span class="nav-icon">🏛️</span>
+                    <span class="nav-label">Kurumlar</span>
+                </button>
+                <button class="nav-item" data-tab="ai-thoughts" id="nav-ai-thoughts">
+                    <span class="nav-icon">🧠</span>
+                    <span class="nav-label">AI Görüşü</span>
+                </button>
+                <button class="nav-item" data-tab="history" id="nav-history">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-label">İşlem Geçmişi</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="market-status">
+                    <span class="status-dot closed" id="market-status-dot"></span>
+                    <span class="status-text" id="market-status-text">Piyasa Kapalı</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menu-toggle">☰</button>
+                    <div class="stock-ticker">
+                        <h1 class="ticker-symbol">ASELS</h1>
+                        <span class="ticker-name">Aselsan Elektronik</span>
+                    </div>
+                </div>
+                <div class="top-bar-right">
+                    <div class="price-display">
+                        <span class="current-price" id="current-price">370,00</span>
+                        <span class="price-currency">₺</span>
+                        <div class="price-change positive" id="price-change">
+                            <span class="change-amount">+11,28</span>
+                            <span class="change-percent">(+3,14%)</span>
+                        </div>
+                    </div>
+                    <div class="datetime" id="datetime"></div>
+                </div>
+            </header>
+
+            <!-- Tab Content Container -->
+            <div class="tab-content-container">
+
+                <!-- ==================== DASHBOARD TAB ==================== -->
+                <section class="tab-content active" id="tab-dashboard">
+                    <!-- Key Metrics Row -->
+                    <div class="metrics-grid">
+                        <div class="metric-card" id="metric-portfolio-value">
+                            <div class="metric-header">
+                                <span class="metric-icon">💰</span>
+                                <span class="metric-label">Portföy Değeri</span>
+                            </div>
+                            <div class="metric-value" id="portfolio-total">₺100.000,00</div>
+                            <div class="metric-change neutral" id="portfolio-change">
+                                <span>0,00%</span>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="metric-cash">
+                            <div class="metric-header">
+                                <span class="metric-icon">🏦</span>
+                                <span class="metric-label">Nakit</span>
+                            </div>
+                            <div class="metric-value" id="cash-amount">₺100.000,00</div>
+                            <div class="metric-sub">Kullanılabilir</div>
+                        </div>
+                        <div class="metric-card" id="metric-shares">
+                            <div class="metric-header">
+                                <span class="metric-icon">📈</span>
+                                <span class="metric-label">ASELS Adet</span>
+                            </div>
+                            <div class="metric-value" id="shares-count">0</div>
+                            <div class="metric-sub" id="shares-value">₺0,00 değerinde</div>
+                        </div>
+                        <div class="metric-card" id="metric-pnl">
+                            <div class="metric-header">
+                                <span class="metric-icon">📊</span>
+                                <span class="metric-label">Kâr/Zarar</span>
+                            </div>
+                            <div class="metric-value neutral" id="total-pnl">₺0,00</div>
+                            <div class="metric-change neutral" id="pnl-percent">0,00%</div>
+                        </div>
+                    </div>
+
+                    <!-- Stock Overview -->
+                    <div class="grid-2col">
+                        <div class="card" id="card-stock-info">
+                            <div class="card-header">
+                                <h3>📋 Hisse Bilgileri</h3>
+                                <span class="badge">BIST-ASELS</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Piyasa Değeri</span>
+                                        <span class="info-value">₺370+ Milyar</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">F/K Oranı</span>
+                                        <span class="info-value">67,27</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">52 Hafta En Düşük</span>
+                                        <span class="info-value">₺151,40</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">52 Hafta En Yüksek</span>
+                                        <span class="info-value">₺450,00</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Beta</span>
+                                        <span class="info-value">0,85</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Temettü Verimi</span>
+                                        <span class="info-value">%0,27</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">EPS (HBK)</span>
+                                        <span class="info-value">₺5,50</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Gelir (Q1 2026)</span>
+                                        <span class="info-value">₺34,3 Milyar</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Net Kâr (Q1)</span>
+                                        <span class="info-value">₺5,53 Milyar</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">FAVÖK Marjı</span>
+                                        <span class="info-value">%25,2</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Bakiye Sipariş</span>
+                                        <span class="info-value">$20,7 Milyar</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">52H Performans</span>
+                                        <span class="info-value highlight-green">+%140,26</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" id="card-technical-summary">
+                            <div class="card-header">
+                                <h3>⚙️ Teknik Özet</h3>
+                                <span class="badge badge-warning">Nötr</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="tech-gauges">
+                                    <div class="gauge-item">
+                                        <div class="gauge-label">Osilatörler</div>
+                                        <div class="gauge-bar">
+                                            <div class="gauge-fill neutral" style="width: 50%"></div>
+                                        </div>
+                                        <div class="gauge-text">Nötr</div>
+                                    </div>
+                                    <div class="gauge-item">
+                                        <div class="gauge-label">Hareketli Ort. (Kısa)</div>
+                                        <div class="gauge-bar">
+                                            <div class="gauge-fill bullish" style="width: 70%"></div>
+                                        </div>
+                                        <div class="gauge-text text-green">Al</div>
+                                    </div>
+                                    <div class="gauge-item">
+                                        <div class="gauge-label">Hareketli Ort. (Uzun)</div>
+                                        <div class="gauge-bar">
+                                            <div class="gauge-fill bearish" style="width: 35%"></div>
+                                        </div>
+                                        <div class="gauge-text text-red">Sat</div>
+                                    </div>
+                                </div>
+
+                                <div class="tech-indicators">
+                                    <h4>Önemli Göstergeler</h4>
+                                    <div class="indicator-list">
+                                        <div class="indicator-item">
+                                            <span class="ind-name">RSI (14)</span>
+                                            <span class="ind-value">48,00</span>
+                                            <span class="ind-signal neutral-signal">Nötr</span>
+                                        </div>
+                                        <div class="indicator-item">
+                                            <span class="ind-name">MACD</span>
+                                            <span class="ind-value">-2,45</span>
+                                            <span class="ind-signal sell-signal">Sat</span>
+                                        </div>
+                                        <div class="indicator-item">
+                                            <span class="ind-name">MA5</span>
+                                            <span class="ind-value">365,20</span>
+                                            <span class="ind-signal buy-signal">Al</span>
+                                        </div>
+                                        <div class="indicator-item">
+                                            <span class="ind-name">MA20</span>
+                                            <span class="ind-value">358,40</span>
+                                            <span class="ind-signal buy-signal">Al</span>
+                                        </div>
+                                        <div class="indicator-item">
+                                            <span class="ind-name">MA50</span>
+                                            <span class="ind-value">382,00</span>
+                                            <span class="ind-signal sell-signal">Sat</span>
+                                        </div>
+                                        <div class="indicator-item">
+                                            <span class="ind-name">MA200</span>
+                                            <span class="ind-value">310,00</span>
+                                            <span class="ind-signal buy-signal">Al</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="support-resistance">
+                                    <h4>Destek & Direnç</h4>
+                                    <div class="sr-levels">
+                                        <div class="sr-item resistance">
+                                            <span class="sr-label">Direnç 2</span>
+                                            <span class="sr-value">₺411,25</span>
+                                        </div>
+                                        <div class="sr-item resistance">
+                                            <span class="sr-label">Direnç 1</span>
+                                            <span class="sr-value">₺395,00</span>
+                                        </div>
+                                        <div class="sr-item current">
+                                            <span class="sr-label">Güncel</span>
+                                            <span class="sr-value">₺370,00</span>
+                                        </div>
+                                        <div class="sr-item support">
+                                            <span class="sr-label">Destek 1</span>
+                                            <span class="sr-value">₺360,00</span>
+                                        </div>
+                                        <div class="sr-item support">
+                                            <span class="sr-label">Destek 2</span>
+                                            <span class="sr-value">₺310,00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Range Visualization -->
+                    <div class="card" id="card-price-range">
+                        <div class="card-header">
+                            <h3>📏 52 Haftalık Fiyat Aralığı</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="price-range-bar">
+                                <span class="range-min">₺151,40</span>
+                                <div class="range-track">
+                                    <div class="range-fill" id="price-range-fill"></div>
+                                    <div class="range-marker" id="price-range-marker">
+                                        <span class="marker-label">₺370,00</span>
+                                    </div>
+                                </div>
+                                <span class="range-max">₺450,00</span>
+                            </div>
+                            <div class="range-info">
+                                <span>52 haftalık en düşük seviyeden <strong>%144,39</strong> yukarıda</span>
+                                <span>52 haftalık en yüksek seviyeden <strong>%17,78</strong> aşağıda</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Live Trading Feed -->
+                    <div class="card" id="card-live-feed">
+                        <div class="card-header">
+                            <h3>🤖 AI Canlı Trading Akışı</h3>
+                            <div class="feed-header-right">
+                                <span class="live-badge" id="live-badge">
+                                    <span class="live-dot"></span>
+                                    CANLI
+                                </span>
+                                <span class="badge" id="feed-date">13 Temmuz 2026</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="trading-feed" id="trading-feed">
+                                <div class="feed-empty" id="feed-empty">
+                                    <div class="feed-empty-icon">🕐</div>
+                                    <p>Piyasa açılışı bekleniyor...</p>
+                                    <p class="feed-empty-sub">13 Temmuz 2026 Pazartesi, saat 10:00'da trading başlayacak.</p>
+                                    <div class="feed-countdown" id="feed-countdown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== ANALYSIS TAB ==================== -->
+                <section class="tab-content" id="tab-analysis">
+                    <div class="card full-width" id="card-fundamental">
+                        <div class="card-header">
+                            <h3>🔬 Temel Analiz — Aselsan (ASELS)</h3>
+                            <span class="badge badge-info">Detaylı Rapor</span>
+                        </div>
+                        <div class="card-body analysis-body">
+                            <div class="analysis-section">
+                                <h4>🏢 Şirket Profili</h4>
+                                <p>Aselsan, Türkiye'nin en büyük savunma elektroniği şirketidir. Askeri ve sivil alanda
+                                    elektronik sistem tasarımı, yazılım geliştirme ve sistem entegrasyonu alanlarında faaliyet
+                                    göstermektedir. Şirketin ana hissedarı Türk Silahlı Kuvvetlerini Güçlendirme Vakfı'dır.</p>
+                            </div>
+
+                            <div class="analysis-columns">
+                                <div class="analysis-section">
+                                    <h4>💪 Güçlü Yanlar</h4>
+                                    <ul class="analysis-list positive-list">
+                                        <li>$20,7 milyar rekor sipariş bakiyesi (%39 artış)</li>
+                                        <li>Q1 2026'da %15 reel gelir büyümesi</li>
+                                        <li>İhracat sözleşmelerinde %69 artış ($629M)</li>
+                                        <li>FAVÖK marjı %25,2'ye yükseldi</li>
+                                        <li>Net Borç/FAVÖK oranı 0,41'e geriledi</li>
+                                        <li>Ar-Ge harcamalarında %41 artış ($357M)</li>
+                                        <li>Savunma sektöründe stratejik konum</li>
+                                        <li>52 haftalık performans: +%140</li>
+                                    </ul>
+                                </div>
+                                <div class="analysis-section">
+                                    <h4>⚠️ Risk Faktörleri</h4>
+                                    <ul class="analysis-list negative-list">
+                                        <li>F/K oranı 67,27 ile yüksek (pahalı değerleme)</li>
+                                        <li>52 haftalık zirveden %17,78 aşağıda</li>
+                                        <li>Uzun vadeli MA'lar sat sinyali veriyor</li>
+                                        <li>Temettü verimi düşük (%0,27)</li>
+                                        <li>Kur riski (gelirler TL, bazı maliyetler döviz)</li>
+                                        <li>Devlet bağımlılığı (ana müşteri)</li>
+                                        <li>Jeopolitik risk faktörleri</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h4>🎯 Analist Hedef Fiyatları</h4>
+                                <div class="target-prices">
+                                    <div class="target-card">
+                                        <span class="target-label">Düşük Hedef</span>
+                                        <span class="target-value">₺400</span>
+                                    </div>
+                                    <div class="target-card highlight">
+                                        <span class="target-label">Ortalama Hedef</span>
+                                        <span class="target-value">₺428,70</span>
+                                    </div>
+                                    <div class="target-card">
+                                        <span class="target-label">Yüksek Hedef</span>
+                                        <span class="target-value">₺470</span>
+                                    </div>
+                                    <div class="target-card current-target">
+                                        <span class="target-label">Güncel Fiyat</span>
+                                        <span class="target-value">₺370,00</span>
+                                    </div>
+                                </div>
+                                <div class="upside-info">
+                                    <span class="upside-badge">Potansiyel Getiri: +%15,86 (Ortalama Hedefe)</span>
+                                </div>
+                            </div>
+
+                            <div class="analysis-section">
+                                <h4>📊 Finansal Performans (Q1 2026)</h4>
+                                <div class="financial-bars">
+                                    <div class="fin-bar-item">
+                                        <div class="fin-bar-label">
+                                            <span>Gelir</span>
+                                            <span>₺34,3 Milyar</span>
+                                        </div>
+                                        <div class="fin-bar-track">
+                                            <div class="fin-bar-fill" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="fin-bar-item">
+                                        <div class="fin-bar-label">
+                                            <span>Net Kâr</span>
+                                            <span>₺5,53 Milyar</span>
+                                        </div>
+                                        <div class="fin-bar-track">
+                                            <div class="fin-bar-fill" style="width: 55%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="fin-bar-item">
+                                        <div class="fin-bar-label">
+                                            <span>FAVÖK Marjı</span>
+                                            <span>%25,2</span>
+                                        </div>
+                                        <div class="fin-bar-track">
+                                            <div class="fin-bar-fill" style="width: 25.2%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="fin-bar-item">
+                                        <div class="fin-bar-label">
+                                            <span>Seri Üretim Yatırımı Artışı</span>
+                                            <span>%261</span>
+                                        </div>
+                                        <div class="fin-bar-track">
+                                            <div class="fin-bar-fill explosive" style="width: 95%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== PORTFOLIO TAB ==================== -->
+                <section class="tab-content" id="tab-portfolio">
+                    <div class="portfolio-summary">
+                        <div class="portfolio-pie-card card" id="card-portfolio-dist">
+                            <div class="card-header">
+                                <h3>🥧 Portföy Dağılımı</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="pie-chart-container">
+                                    <canvas id="portfolio-pie" width="300" height="300"></canvas>
+                                </div>
+                                <div class="pie-legend" id="pie-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background: #00d4aa"></span>
+                                        <span>Nakit</span>
+                                        <span class="legend-value" id="legend-cash">%100</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color" style="background: #7c5cfc"></span>
+                                        <span>ASELS</span>
+                                        <span class="legend-value" id="legend-asels">%0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="portfolio-details card" id="card-portfolio-details">
+                            <div class="card-header">
+                                <h3>📊 Portföy Detayları</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="portfolio-stat-grid">
+                                    <div class="port-stat">
+                                        <span class="port-stat-label">Toplam Değer</span>
+                                        <span class="port-stat-value" id="port-total-value">₺100.000,00</span>
+                                    </div>
+                                    <div class="port-stat">
+                                        <span class="port-stat-label">Nakit</span>
+                                        <span class="port-stat-value" id="port-cash">₺100.000,00</span>
+                                    </div>
+                                    <div class="port-stat">
+                                        <span class="port-stat-label">Hisse Değeri</span>
+                                        <span class="port-stat-value" id="port-stock-value">₺0,00</span>
+                                    </div>
+                                    <div class="port-stat">
+                                        <span class="port-stat-label">Ort. Maliyet</span>
+                                        <span class="port-stat-value" id="port-avg-cost">—</span>
+                                    </div>
+                                    <div class="port-stat">
+                                        <span class="port-stat-label">Toplam Kâr/Zarar</span>
+                                        <span class="port-stat-value" id="port-pnl">₺0,00</span>
+                                    </div>
+                                    <div class="port-stat">
+                                        <span class="port-stat-label">İşlem Sayısı</span>
+                                        <span class="port-stat-value" id="port-trade-count">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TRADING TAB ==================== -->
+                <section class="tab-content" id="tab-trading">
+                    <div class="trading-layout">
+                        <div class="card trading-card" id="card-buy">
+                            <div class="card-header">
+                                <h3>🟢 Alış Emri</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="trade-form">
+                                    <div class="form-group">
+                                        <label>Alış Fiyatı (₺)</label>
+                                        <input type="number" id="buy-price" value="370" step="0.25" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Adet</label>
+                                        <input type="number" id="buy-quantity" value="1" min="1" class="form-input">
+                                    </div>
+                                    <div class="trade-summary">
+                                        <div class="trade-info">
+                                            <span>Toplam Maliyet:</span>
+                                            <span id="buy-total">₺370,00</span>
+                                        </div>
+                                        <div class="trade-info">
+                                            <span>Komisyon (%0,2):</span>
+                                            <span id="buy-commission">₺0,74</span>
+                                        </div>
+                                        <div class="trade-info total-cost">
+                                            <span>Toplam:</span>
+                                            <span id="buy-grand-total">₺370,74</span>
+                                        </div>
+                                        <div class="trade-info">
+                                            <span>Kullanılabilir:</span>
+                                            <span id="buy-available">₺100.000,00</span>
+                                        </div>
+                                    </div>
+                                    <div class="quick-buy-buttons">
+                                        <button class="quick-btn" data-percent="25" id="quick-buy-25">%25</button>
+                                        <button class="quick-btn" data-percent="50" id="quick-buy-50">%50</button>
+                                        <button class="quick-btn" data-percent="75" id="quick-buy-75">%75</button>
+                                        <button class="quick-btn" data-percent="100" id="quick-buy-100">%100</button>
+                                    </div>
+                                    <button class="btn btn-buy" id="btn-execute-buy">
+                                        <span>🟢 AL</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card trading-card" id="card-sell">
+                            <div class="card-header">
+                                <h3>🔴 Satış Emri</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="trade-form">
+                                    <div class="form-group">
+                                        <label>Satış Fiyatı (₺)</label>
+                                        <input type="number" id="sell-price" value="370" step="0.25" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Adet</label>
+                                        <input type="number" id="sell-quantity" value="1" min="1" class="form-input">
+                                    </div>
+                                    <div class="trade-summary">
+                                        <div class="trade-info">
+                                            <span>Toplam Gelir:</span>
+                                            <span id="sell-total">₺370,00</span>
+                                        </div>
+                                        <div class="trade-info">
+                                            <span>Komisyon (%0,2):</span>
+                                            <span id="sell-commission">₺0,74</span>
+                                        </div>
+                                        <div class="trade-info total-cost">
+                                            <span>Net Gelir:</span>
+                                            <span id="sell-grand-total">₺369,26</span>
+                                        </div>
+                                        <div class="trade-info">
+                                            <span>Eldeki Hisse:</span>
+                                            <span id="sell-available">0 adet</span>
+                                        </div>
+                                    </div>
+                                    <div class="quick-sell-buttons">
+                                        <button class="quick-btn" data-percent="25" id="quick-sell-25">%25</button>
+                                        <button class="quick-btn" data-percent="50" id="quick-sell-50">%50</button>
+                                        <button class="quick-btn" data-percent="75" id="quick-sell-75">%75</button>
+                                        <button class="quick-btn" data-percent="100" id="quick-sell-100">%100</button>
+                                    </div>
+                                    <button class="btn btn-sell" id="btn-execute-sell">
+                                        <span>🔴 SAT</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Suggestion in Trading -->
+                        <div class="card trading-card ai-suggestion-card" id="card-ai-suggestion">
+                            <div class="card-header">
+                                <h3>🤖 AI Strateji Önerisi</h3>
+                                <span class="badge badge-ai">Canlı</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="ai-suggestion" id="ai-trade-suggestion">
+                                    <div class="ai-verdict" id="ai-verdict">
+                                        <span class="verdict-icon">⏸️</span>
+                                        <span class="verdict-text">BEKLE</span>
+                                    </div>
+                                    <div class="ai-reasoning" id="ai-reasoning">
+                                        Yükleniyor...
+                                    </div>
+                                    <div class="ai-strategy" id="ai-strategy">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== AI THOUGHTS TAB ==================== -->
+                <section class="tab-content" id="tab-ai-thoughts">
+                    <div class="card full-width" id="card-ai-analysis">
+                        <div class="card-header">
+                            <h3>🧠 AI Piyasa Görüşü — Aselsan Analizi</h3>
+                            <span class="badge badge-ai">Detaylı Rapor</span>
+                        </div>
+                        <div class="card-body ai-analysis-body" id="ai-analysis-content">
+                            <!-- AI analysis content will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="card full-width" id="card-money-philosophy">
+                        <div class="card-header">
+                            <h3>💡 Para Yönetimi Felsefem</h3>
+                        </div>
+                        <div class="card-body ai-philosophy" id="ai-philosophy-content">
+                            <!-- Money management philosophy populated by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== HISTORY TAB ==================== -->
+                <section class="tab-content" id="tab-history">
+                    <div class="card full-width" id="card-trade-history">
+                        <div class="card-header">
+                            <h3>📜 İşlem Geçmişi</h3>
+                            <button class="btn btn-sm btn-outline" id="btn-clear-history">Temizle</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="history-table-container">
+                                <table class="history-table" id="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tarih</th>
+                                            <th>İşlem</th>
+                                            <th>Fiyat</th>
+                                            <th>Adet</th>
+                                            <th>Toplam</th>
+                                            <th>Komisyon</th>
+                                            <th>Durum</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-body">
+                                        <tr class="empty-row">
+                                            <td colspan="7">Henüz işlem yapılmadı</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== INSTITUTIONS TAB ==================== -->
+                <section class="tab-content" id="tab-institutions">
+                    <!-- Overview Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">🏦</span>
+                                <span class="metric-label">Net Kurumsal Akış</span>
+                            </div>
+                            <div class="metric-value positive">+4.979.285 Lot</div>
+                            <div class="metric-sub">Haftalık net alım (29 Haz - 3 Tem)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">🌍</span>
+                                <span class="metric-label">Yabancı Oranı</span>
+                            </div>
+                            <div class="metric-value">%54,00</div>
+                            <div class="metric-sub">Q1 2026 yabancı takas oranı</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">🔒</span>
+                                <span class="metric-label">TSKGV Payı</span>
+                            </div>
+                            <div class="metric-value">%74,20</div>
+                            <div class="metric-sub">Ana ortak (sabit)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-icon">📊</span>
+                                <span class="metric-label">Halka Açıklık</span>
+                            </div>
+                            <div class="metric-value">%25,80</div>
+                            <div class="metric-sub">İşlem gören pay</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2col">
+                        <!-- Top Buyers -->
+                        <div class="card" id="card-top-buyers">
+                            <div class="card-header">
+                                <h3>🟢 En Fazla Net Alım Yapan Kurumlar</h3>
+                                <span class="badge">Haftalık</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="inst-table">
+                                    <div class="inst-row inst-header">
+                                        <span class="inst-rank">#</span>
+                                        <span class="inst-name">Kurum</span>
+                                        <span class="inst-volume">Net Alım (Lot)</span>
+                                        <span class="inst-bar-col">Oran</span>
+                                    </div>
+                                    <div class="inst-row buyer">
+                                        <span class="inst-rank">1</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Ak Yatırım
+                                        </span>
+                                        <span class="inst-volume">8.424.629</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill buy-fill" style="width: 100%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row buyer">
+                                        <span class="inst-rank">2</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Yapı Kredi Yatırım
+                                        </span>
+                                        <span class="inst-volume">3.169.112</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill buy-fill" style="width: 37.6%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row buyer">
+                                        <span class="inst-rank">3</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            QNB Yatırım
+                                        </span>
+                                        <span class="inst-volume">458.957</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill buy-fill" style="width: 5.4%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row buyer">
+                                        <span class="inst-rank">4</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Ata Yatırım
+                                        </span>
+                                        <span class="inst-volume">364.432</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill buy-fill" style="width: 4.3%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row buyer">
+                                        <span class="inst-rank">5</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Ünlü Menkul
+                                        </span>
+                                        <span class="inst-volume">229.923</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill buy-fill" style="width: 2.7%"></div></div>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top Sellers -->
+                        <div class="card" id="card-top-sellers">
+                            <div class="card-header">
+                                <h3>🔴 En Fazla Net Satış Yapan Kurumlar</h3>
+                                <span class="badge badge-warning">Haftalık</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="inst-table">
+                                    <div class="inst-row inst-header">
+                                        <span class="inst-rank">#</span>
+                                        <span class="inst-name">Kurum</span>
+                                        <span class="inst-volume">Net Satış (Lot)</span>
+                                        <span class="inst-bar-col">Oran</span>
+                                    </div>
+                                    <div class="inst-row seller">
+                                        <span class="inst-rank">1</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Garanti BBVA Yatırım
+                                        </span>
+                                        <span class="inst-volume">3.215.480</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill sell-fill" style="width: 100%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row seller">
+                                        <span class="inst-rank">2</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🌐</span>
+                                            Bank of America (BofA)
+                                        </span>
+                                        <span class="inst-volume">3.050.000</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill sell-fill" style="width: 94.8%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row seller">
+                                        <span class="inst-rank">3</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            İş Yatırım
+                                        </span>
+                                        <span class="inst-volume">845.290</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill sell-fill" style="width: 26.3%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row seller">
+                                        <span class="inst-rank">4</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Deniz Yatırım
+                                        </span>
+                                        <span class="inst-volume">412.650</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill sell-fill" style="width: 12.8%"></div></div>
+                                        </span>
+                                    </div>
+                                    <div class="inst-row seller">
+                                        <span class="inst-rank">5</span>
+                                        <span class="inst-name">
+                                            <span class="inst-logo">🏦</span>
+                                            Gedik Yatırım
+                                        </span>
+                                        <span class="inst-volume">144.348</span>
+                                        <span class="inst-bar-col">
+                                            <div class="inst-bar"><div class="inst-bar-fill sell-fill" style="width: 4.5%"></div></div>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BofA Detailed Analysis -->
+                    <div class="card" id="card-bofa-detail">
+                        <div class="card-header">
+                            <h3>🌐 Bank of America (BofA) — Detaylı İşlem Analizi</h3>
+                            <span class="badge badge-warning">7 Temmuz 2026</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="bofa-grid">
+                                <div class="bofa-stat">
+                                    <span class="bofa-label">Toplam İşlem Hacmi</span>
+                                    <span class="bofa-value">21,8M Lot</span>
+                                </div>
+                                <div class="bofa-stat">
+                                    <span class="bofa-label">Alım</span>
+                                    <span class="bofa-value positive">9,3M Lot</span>
+                                </div>
+                                <div class="bofa-stat">
+                                    <span class="bofa-label">Satış</span>
+                                    <span class="bofa-value negative">12,4M Lot</span>
+                                </div>
+                                <div class="bofa-stat">
+                                    <span class="bofa-label">Net Pozisyon</span>
+                                    <span class="bofa-value negative">-3,05M Lot (Satış)</span>
+                                </div>
+                            </div>
+                            <div class="bofa-analysis">
+                                <p>🔍 <strong>AI Yorumu:</strong> BofA'nın 7 Temmuz'daki net satışı dikkat çekici. Yabancı kurumlar genellikle kısa vadeli pozisyon kapatma veya portföy dengeleme amacıyla hareket eder. Bu satış, Aselsan'ın 10 Temmuz'daki 1,47 milyar euro'luk sözleşme haberinden ÖNCE gerçekleşti — bu da "haberde sat" stratejisinden ziyade rutin bir portföy ayarlaması olabilir.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ownership Structure -->
+                    <div class="grid-2col">
+                        <div class="card" id="card-ownership">
+                            <div class="card-header">
+                                <h3>🥧 Ortaklık Yapısı</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="ownership-chart">
+                                    <canvas id="ownership-pie" width="280" height="280"></canvas>
+                                </div>
+                                <div class="ownership-legend">
+                                    <div class="own-legend-item">
+                                        <span class="own-color" style="background: #7c5cfc"></span>
+                                        <span class="own-name">TSKGV (Ana Ortak)</span>
+                                        <span class="own-pct">%74,20</span>
+                                    </div>
+                                    <div class="own-legend-item">
+                                        <span class="own-color" style="background: #4da6ff"></span>
+                                        <span class="own-name">Yabancı Yatırımcılar</span>
+                                        <span class="own-pct">~%14,00</span>
+                                    </div>
+                                    <div class="own-legend-item">
+                                        <span class="own-color" style="background: #00d4aa"></span>
+                                        <span class="own-name">Yerli Kurumsal</span>
+                                        <span class="own-pct">~%6,80</span>
+                                    </div>
+                                    <div class="own-legend-item">
+                                        <span class="own-color" style="background: #ffc048"></span>
+                                        <span class="own-name">Bireysel Yatırımcılar</span>
+                                        <span class="own-pct">~%5,00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card" id="card-global-holders">
+                            <div class="card-header">
+                                <h3>🌍 Küresel Kurumsal Yatırımcılar</h3>
+                                <span class="badge badge-info">Pozisyon Sahipleri</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="global-holders">
+                                    <div class="holder-item">
+                                        <div class="holder-info">
+                                            <span class="holder-flag">🇺🇸</span>
+                                            <div>
+                                                <span class="holder-name">BlackRock</span>
+                                                <span class="holder-type">ETF & Fon Yönetimi</span>
+                                            </div>
+                                        </div>
+                                        <span class="holder-stance hold-stance">TUT</span>
+                                    </div>
+                                    <div class="holder-item">
+                                        <div class="holder-info">
+                                            <span class="holder-flag">🇺🇸</span>
+                                            <div>
+                                                <span class="holder-name">Vanguard</span>
+                                                <span class="holder-type">Endeks Fonu</span>
+                                            </div>
+                                        </div>
+                                        <span class="holder-stance hold-stance">TUT</span>
+                                    </div>
+                                    <div class="holder-item">
+                                        <div class="holder-info">
+                                            <span class="holder-flag">🇺🇸</span>
+                                            <div>
+                                                <span class="holder-name">FMR LLC (Fidelity)</span>
+                                                <span class="holder-type">Aktif Fon Yönetimi</span>
+                                            </div>
+                                        </div>
+                                        <span class="holder-stance buy-stance">AL</span>
+                                    </div>
+                                    <div class="holder-item">
+                                        <div class="holder-info">
+                                            <span class="holder-flag">🇹🇷</span>
+                                            <div>
+                                                <span class="holder-name">Ak Portföy</span>
+                                                <span class="holder-type">Yerli Fon Yönetimi</span>
+                                            </div>
+                                        </div>
+                                        <span class="holder-stance buy-stance">AL</span>
+                                    </div>
+                                    <div class="holder-item">
+                                        <div class="holder-info">
+                                            <span class="holder-flag">🇹🇷</span>
+                                            <div>
+                                                <span class="holder-name">Garanti Portföy</span>
+                                                <span class="holder-type">Yerli Fon Yönetimi</span>
+                                            </div>
+                                        </div>
+                                        <span class="holder-stance sell-stance">SAT</span>
+                                    </div>
+                                    <div class="holder-item">
+                                        <div class="holder-info">
+                                            <span class="holder-flag">🇺🇸</span>
+                                            <div>
+                                                <span class="holder-name">Bank of America</span>
+                                                <span class="holder-type">Yatırım Bankası</span>
+                                            </div>
+                                        </div>
+                                        <span class="holder-stance sell-stance">SAT</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Institutional Analysis -->
+                    <div class="card" id="card-inst-ai-analysis">
+                        <div class="card-header">
+                            <h3>🧠 AI Kurumsal Analiz Yorumu</h3>
+                            <span class="badge badge-ai">Analiz</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="inst-ai-content">
+                                <div class="ai-section">
+                                    <h4>📊 Genel Kurumsal Akış Değerlendirmesi</h4>
+                                    <p>Haftalık veriler net bir tablo çiziyor: <strong>Yerli kurumlar ALICI, yabancı kurumlar SATICI tarafında.</strong>
+                                    Ak Yatırım'ın 8,4 milyon lotluk dev alımı ve Yapı Kredi'nin 3,1 milyon lotluk takibi,
+                                    yerli kurumsal yatırımcıların Aselsan'a olan güveninin güçlü olduğunu gösteriyor.</p>
+                                    
+                                    <div class="highlight-box">
+                                        <p>💡 <strong>Kritik Gözlem:</strong> Ak Yatırım'ın bu kadar büyük hacimli alımı, büyük bir portföy yöneticisinin
+                                        stratejik pozisyon aldığına işaret edebilir. Özellikle 10 Temmuz'daki 1,47 milyar euro'luk sözleşme
+                                        haberi öncesi yapılan bu alımlar, "bilgilendirilmiş yatırımcı" (smart money) hareketine benziyor.</p>
+                                    </div>
+                                </div>
+
+                                <div class="ai-section">
+                                    <h4>🌍 Yabancı Yatırımcı Davranışı</h4>
+                                    <p>Yabancı oranı %54 ile hâlâ yüksek, ancak Haziran 2026'da net satış tarafında oldular.
+                                    BofA'nın 7 Temmuz'daki 3,05 milyon lotluk net satışı, yabancıların kısa vadede temkinli olduğunu gösteriyor.
+                                    Ancak BlackRock ve Vanguard gibi devler pozisyonlarını koruyor — bu, uzun vadeli güvenin bozulmadığını işaret ediyor.</p>
+                                    
+                                    <div class="warning-box">
+                                        <p>⚠️ <strong>Dikkat:</strong> Yabancı satışları genellikle küresel risk iştahı ve döviz kuru hareketleriyle ilgilidir.
+                                        Türkiye'ye özgü bir olumsuzluktan çok, genel "gelişen piyasa" portföy ayarlaması olabilir.</p>
+                                    </div>
+                                </div>
+
+                                <div class="ai-section">
+                                    <h4>🎯 Trading İçin Ne Anlama Geliyor?</h4>
+                                    <p>Kurumsal akış analizi, benim trading stratejimi destekliyor:</p>
+                                    <p>• <strong>Yerli kurumlar ALICI</strong> → Kısa-orta vadede destek var<br>
+                                    • <strong>Yabancılar SATICI</strong> → Kısa vadede baskı olabilir<br>
+                                    • <strong>Smart money hareketi</strong> → Sözleşme haberi öncesi büyük alımlar pozitif sinyal<br>
+                                    • <strong>Sonuç:</strong> Kademeli alım stratejisi doğru — düşüşlerde al, yükselişlerde sabret</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent News Impact -->
+                    <div class="card" id="card-news-impact">
+                        <div class="card-header">
+                            <h3>📰 Son Gelişmeler ve Kurumsal Tepki</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="news-timeline">
+                                <div class="news-item">
+                                    <div class="news-date">10 Tem 2026</div>
+                                    <div class="news-body">
+                                        <div class="news-title">🚀 1,47 Milyar Euro Hava Savunma Sözleşmesi</div>
+                                        <div class="news-desc">SSB ile dev seri üretim sözleşmesi. Hisse %3,14 yükselişle 370 TL'ye çıktı.</div>
+                                        <div class="news-impact positive">Etkisi: Güçlü Pozitif ↑</div>
+                                    </div>
+                                </div>
+                                <div class="news-item">
+                                    <div class="news-date">7 Tem 2026</div>
+                                    <div class="news-body">
+                                        <div class="news-title">🌐 BofA 3,05M Lot Net Satış</div>
+                                        <div class="news-desc">Bank of America müşterileri 21,8M lot işlem hacmiyle aktif. Net 3,05M lot satış.</div>
+                                        <div class="news-impact negative">Etkisi: Kısa Vadeli Baskı ↓</div>
+                                    </div>
+                                </div>
+                                <div class="news-item">
+                                    <div class="news-date">29 Haz - 3 Tem</div>
+                                    <div class="news-body">
+                                        <div class="news-title">🏦 Ak Yatırım 8,4M Lot Büyük Alım</div>
+                                        <div class="news-desc">Haftalık bazda en büyük net alıcı. Yapı Kredi 3,1M lotla takipte.</div>
+                                        <div class="news-impact positive">Etkisi: Güçlü Destek ↑</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Trade Confirmation Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="trade-modal">
+            <div class="modal-header" id="modal-header">
+                <h3 id="modal-title">İşlem Onayı</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-cancel">İptal</button>
+                <button class="btn btn-primary" id="modal-confirm">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
