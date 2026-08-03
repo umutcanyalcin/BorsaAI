@@ -1,32 +1,42 @@
-name: BorsaAI Trading Bot
+name: BorsaAI — ASELS Trading Bot
 
 on:
   schedule:
+    # Pazartesi-Cuma, Türkiye saati 10:00-18:00 arası her 5 dakikada bir (UTC 07:00-15:00)
     - cron: '*/5 7-15 * * 1-5'
   workflow_dispatch:
+    inputs:
+      force_trade:
+        description: 'Zorunlu işlem (bot her durumda karar verecek)'
+        required: false
+        default: 'false'
 
 jobs:
   trade:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      
+
     steps:
-      - name: Kodları İndir (Checkout)
-        uses: actions/checkout@v3
+      - name: 📥 Kodları İndir (Checkout)
+        uses: actions/checkout@v4
 
-      - name: Python Kurulumu
-        uses: actions/setup-python@v4
+      - name: 🐍 Python Kurulumu
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: Kütüphaneleri Yükle
-        run: |
-          pip install -r requirements.txt
+      - name: 📦 Kütüphaneleri Yükle
+        run: pip install -r requirements.txt
 
-      - name: Yapay Zeka Botunu Çalıştır
+      - name: 🤖 AI Trading Botunu Çalıştır
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
+          echo "=== Bot Başlatılıyor ==="
+          echo "Zaman: $(TZ='Europe/Istanbul' date)"
           python bot.py
+          echo "=== Bot Tamamlandı ==="
