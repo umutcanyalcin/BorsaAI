@@ -34,7 +34,53 @@ async function loadState() {
         const response = await fetch('database.json?_=' + new Date().getTime());
         if (response.ok) {
             const parsed = await response.json();
+            const prevTradeCount = STATE.trades.length;
             Object.assign(STATE, parsed);
+
+            // Canlı Fiyat Göstergelerini Güncelle
+            if (STATE.currentPrice) {
+                document.getElementById('current-price').textContent = formatNumber(STATE.currentPrice);
+
+                if (STATE.previousClose) {
+                    const changeAmount = STATE.currentPrice - STATE.previousClose;
+                    const changePercent = (changeAmount / STATE.previousClose) * 100;
+                    const isPositive = changeAmount >= 0;
+                    const changeEl = document.getElementById('price-change');
+                    if (changeEl) {
+                        changeEl.className = 'price-change ' + (isPositive ? 'positive' : 'negative');
+                        changeEl.innerHTML = `
+                            <span class="change-amount">${isPositive ? '+' : ''}${formatNumber(changeAmount)}</span>
+                            <span class="change-percent">(${isPositive ? '+' : ''}${changePercent.toFixed(2)}%)</span>
+                        `;
+                    }
+                }
+            }
+
+            // Yeni bot işlemi yapıldıysa feed'e ekle
+            if (STATE.trades.length > prevTradeCount && STATE.trades.length > 0) {
+                const newTrade = STATE.trades[0];
+                const isBuy = newTrade.type === 'ALIM' || newTrade.type === 'buy';
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                const dateStr = now.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' });
+                addFeedEntry({
+                    time: timeStr,
+                    date: dateStr,
+                    type: isBuy ? 'buy' : 'sell',
+                    icon: isBuy ? '🟢' : '🔴',
+                    title: isBuy ? `ALIM: ${newTrade.amount || newTrade.quantity} adet ASELS` : `SATIŞ: ${newTrade.amount || newTrade.quantity} adet ASELS`,
+                    titleClass: isBuy ? 'buy-title' : 'sell-title',
+                    desc: STATE.aiThoughts || '',
+                    tags: [
+                        { text: `₺${formatNumber(newTrade.price)}`, class: 'price' },
+                        { text: `Toplam: ₺${formatNumber(newTrade.total)}`, class: isBuy ? 'buy' : 'sell' }
+                    ]
+                });
+            } else if (STATE.aiThoughts && STATE.aiThoughts !== (STATE._lastAiThoughts || '')) {
+                // AI'ın BEKLE durumunu da feed'e ekle (her 5 dakikada bir)
+                STATE._lastAiThoughts = STATE.aiThoughts;
+            }
+
             updateAllDisplays();
             drawPieChart();
             drawOwnershipPieChart();
@@ -44,11 +90,29 @@ async function loadState() {
     }
 }
 
-// Bulut sisteminde saveState artık frontend'den yapılmıyor.
-// İşlemleri sadece arka plandaki AI bot (bot.py) yapıyor ve database.json'u güncelliyor.
-function saveState() {
-    // Read-only modda olduğumuz için bu fonksiyon devre dışı bırakıldı.
-    // Kullanıcı frontend'den işlem yapmak yerine AI'ı izleyecek.
+// saveState: database.json'u günceller (manuel işlemler için)
+async function saveState() {
+    const payload = {
+        cash: STATE.cash,
+        shares: STATE.shares,
+        avgCost: STATE.avgCost,
+        totalCost: STATE.totalCost || (STATE.shares * STATE.avgCost),
+        currentPrice: STATE.currentPrice,
+        previousClose: STATE.previousClose,
+        trades: STATE.trades,
+        aiThoughts: STATE.aiThoughts || 'Manuel işlem yapıldı.',
+        plannedAction: STATE.plannedAction || 'Piyasalar izleniyor...'
+    };
+    try {
+        await fetch('database.json', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload, null, 4)
+        });
+    } catch(e) {
+        // GitHub Pages gibi statik ortamlarda yazma desteklenmez, yerel geliştirmede çalışır
+        console.warn('saveState (fetch) başarısız — yerel geliştirme ortamı değil olabilir:', e);
+    }
 }
 
 // Her 15 saniyede bir veritabanını kontrol et (Canlı İzleme)
@@ -414,10 +478,59 @@ function updateAllDisplays() {
     totalPnLEl.textContent = (totalPnL >= 0 ? '+' : '-') + '₺' + formatNumber(Math.abs(totalPnL));
     totalPnLEl.className = 'metric-value ' + (totalPnL > 0 ? 'positive' : totalPnL < 0 ? 'negative' : 'neutral');
 
-    const pnlPercentEl = document.getElementById('pnl-percent');
-    const pnlPercent = (totalPnL / STATE.initialCapital) * 100;
-    pnlPercentEl.textContent = (pnlPercent >= 0 ? '+' : '') + pnlPercent.toFixed(2) + '%';
-    pnlPercentEl.className = 'metric-change ' + (pnlPercent > 0 ? 'positive' : pnlPercent < 0 ? 'negative' : 'neutral');
+    const avgCostEl = document.getElementById('avg-cost');
+    if (avgCostEl) {
+        avgCostEl.textContent = 'Maliyet: ' + (STATE.avgCost > 0 ? '₺' + formatNumber(STATE.avgCost) : '₺0,00');
+    }
+
+    // Daily Target (5000 TL)
+    const dailyTargetEl = document.getElementById('daily-target-value');
+    const targetFillEl = document.getElementById('target-progress-fill');
+    if (dailyTargetEl && targetFillEl) {
+        const target = 5000;
+        const currentTarget = Math.max(0, totalPnL); // Only count positive PnL towards target
+        const progress = Math.min(100, (currentTarget / target) * 100);
+        
+        dailyTargetEl.textContent = '₺' + formatNumber(currentTarget) + ' / ₺5.000';
+        targetFillEl.style.width = progress + '%';
+        
+        if (progress >= 100) {
+            targetFillEl.style.background = 'var(--accent-green)';
+        } else {
+            targetFillEl.style.background = 'var(--gradient-purple)';
+        }
+    }
+    
+    // Planned Action
+    const plannedActionEl = document.getElementById('ai-planned-action');
+    if (plannedActionEl) {
+        plannedActionEl.textContent = STATE.plannedAction || "Piyasalar izleniyor, henüz bir plan oluşturulmadı...";
+    }
+
+    // Daily Closing Report
+    const reportTextEl = document.getElementById('daily-report-text');
+    const reportDateEl = document.getElementById('daily-report-date');
+    if (reportTextEl && reportDateEl) {
+        if (STATE.dailyReport && STATE.dailyReport.text) {
+            reportDateEl.textContent = STATE.dailyReport.date;
+            
+            // Basit Markdown -> HTML Dönüştürücü
+            let rawText = STATE.dailyReport.text;
+            let htmlText = rawText
+                .replace(/\#\#\#\s*(.*?)\n/g, '<h4>$1</h4>')
+                .replace(/\#\#\s*(.*?)\n/g, '<h4>$1</h4>')
+                .replace(/\*\s*\*\*(.*?)\*\*:(.*?)\n/g, '<li><strong>$1</strong>: $2</li>')
+                .replace(/\*\s*\*\*(.*?)\*\*(.*?)\n/g, '<li><strong>$1</strong>$2</li>')
+                .replace(/\*\s*(.*?)\n/g, '<li>$1</li>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+                
+            reportTextEl.innerHTML = '<p>' + htmlText + '</p>';
+        } else {
+            reportDateEl.textContent = "Günün Sonu";
+            reportTextEl.innerHTML = "Günlük değerlendirme raporu her gün saat 18:00'dan sonra otomatik olarak burada yayınlanacaktır.";
+        }
+    }
 
     // Portfolio tab
     document.getElementById('port-total-value').textContent = '₺' + formatNumber(portfolioTotal);
@@ -450,17 +563,31 @@ function updateHistoryTable() {
         return;
     }
 
-    tbody.innerHTML = STATE.trades.map(trade => `
-        <tr class="${trade.type === 'buy' ? 'buy-row' : 'sell-row'}">
+    tbody.innerHTML = STATE.trades.map(trade => {
+        // Bot kayıtları: type='ALIM'/'SATIM', amount=adet
+        // Manuel kayıtlar: type='buy'/'sell', quantity=adet
+        const isBuy = (trade.type === 'buy' || trade.type === 'ALIM');
+        const rowClass = isBuy ? 'buy-row' : 'sell-row';
+        const typeLabel = isBuy ? '🟢 ALIŞ' : '🔴 SATIŞ';
+        const qty = trade.quantity || trade.amount || 0;
+        const total = trade.total || 0;
+        const commission = trade.commission || 0;
+        const pnl = trade.pnl != null ? trade.pnl : null;
+        const statusText = trade.status || 'Gerçekleşti';
+        const pnlHtml = pnl != null
+            ? `<br><small style="color:${pnl >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${pnl >= 0 ? '+' : ''}₺${formatNumber(Math.abs(pnl))}</small>`
+            : '';
+        return `
+        <tr class="${rowClass}">
             <td>${trade.date}</td>
-            <td>${trade.type === 'buy' ? '🟢 ALIŞ' : '🔴 SATIŞ'}</td>
+            <td>${typeLabel}</td>
             <td style="font-family: var(--font-mono);">₺${formatNumber(trade.price)}</td>
-            <td>${trade.quantity}</td>
-            <td style="font-family: var(--font-mono);">₺${formatNumber(trade.total)}</td>
-            <td style="font-family: var(--font-mono);">₺${formatNumber(trade.commission)}</td>
-            <td><span class="badge">${trade.status}</span></td>
-        </tr>
-    `).join('');
+            <td>${qty}</td>
+            <td style="font-family: var(--font-mono);">₺${formatNumber(total)}${pnlHtml}</td>
+            <td style="font-family: var(--font-mono);">₺${formatNumber(commission)}</td>
+            <td><span class="badge">${statusText}</span></td>
+        </tr>`;
+    }).join('');
 }
 
 // ==================== PIE CHART ====================
