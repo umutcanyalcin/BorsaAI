@@ -1,10 +1,10 @@
 {
     "cash": 100000.0,
     "shares": 0,
-    "currentPrice": 387.5,
+    "currentPrice": 392.25,
     "avgCost": 0,
     "totalCost": 0,
     "trades": [],
     "aiThoughts": "AI analiz hatas\u0131 \u2014 bir sonraki d\u00f6ng\u00fcde tekrar denenecek.",
-    "previousClose": 395.75
+    "previousClose": 387.5
 }
