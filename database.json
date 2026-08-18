@@ -1,11 +1,11 @@
 {
     "cash": 100000,
     "shares": 0,
-    "currentPrice": 389.0,
-    "previousClose": 387.5,
+    "currentPrice": 385.5,
+    "previousClose": 389.0,
     "avgCost": 0,
     "totalCost": 0,
     "trades": [],
-    "aiThoughts": "Bot bulutta ba\u015far\u0131yla ba\u015flat\u0131ld\u0131!",
+    "aiThoughts": "AI analiz hatas\u0131 \u2014 bir sonraki d\u00f6ng\u00fcde tekrar denenecek.",
     "plannedAction": "Piyasalar izleniyor..."
 }
