@@ -1,8 +1,8 @@
 {
     "cash": 100000,
     "shares": 0,
-    "currentPrice": 381.25,
-    "previousClose": 389.0,
+    "currentPrice": 382.25,
+    "previousClose": 381.25,
     "avgCost": 0,
     "totalCost": 0,
     "trades": [],
